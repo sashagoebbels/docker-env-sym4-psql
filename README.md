@@ -13,10 +13,35 @@ The html directory is a bound volume to /var/www/html in the web server image. D
 To put in your Symfony project do a `git clone <project-url> html`, go to the html directory and call `composer install`.
 When asked for the database settings use the ones defined in the `docker-compose.yml` file.
 
+## Using PostgreSQL with Symfony
+
+### Set database url in .env file
+
+If you didn't change the credentials in `docker-compose.yml`, this should be your DATABASE_URL:
+```
+DATABASE_URL=mysql://pguser:pguserpw@pdb:5432/pgdb
+```
+
+### Set database defaults in `config/packages/doctrine.yaml`
+
+You only need to change the doctrine.dbal config, which should read like this:
+```
+doctrine:
+    dbal:
+        # configure these for your database server
+        driver: 'pdo_pgsql'
+        charset: UTF-8
+
+        # With Symfony 3.3, remove the `resolve:` prefix
+        url: '%env(resolve:DATABASE_URL)%'
+```
+
 ## Accessing the cluster nodes
 
 - Webserver with PHP is under `localhost`
-- phpMyAdmin runs under `localhost:8080`
+- MySQL runs on `localhost:3306`
+- PostgreSQL runs on `localhost:5432`
+- Adminer runs on `localhost:8080`
 - Kibana can be found under `localhost:81`
 
 ## Internals
