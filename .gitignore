@@ -3,5 +3,5 @@ db/*
 html/*
 !html/.gitkeep
 mysql/*
-pgdata/*
+pgsql/*
 .env

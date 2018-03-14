@@ -12,6 +12,7 @@ services:
       - php-logs:/var/log/apache2
     links:
       - db
+      #- pdb
 
   db:
     build:
@@ -27,16 +28,29 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
   
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
+  pdb:
+    image: postgres
+    restart: always
     ports:
-      - "${PHPMYADMINPORT}:80"
+      - "${PDBPORT}:5432"
     environment:
-      MYSQL_USERNAME: root
-      MYSQL_ROOT_PASSWORD: rootpw
-      PMA_HOST: db
-      PMA_ARBITRARY: 1
-
+      POSTGRES_PASSWORD: example
+    environment:
+      - POSTGRES_DB=pgdb
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pguserpw
+    volumes:
+      - ./pgsql:/var/lib/postgresql/data
+  
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "${ADMINDERPORT}:8080"
+    links:
+      - db
+      - pdb
+      
   elk:
     image: willdurand/elk
     ports:
