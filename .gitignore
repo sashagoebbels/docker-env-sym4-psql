@@ -1,0 +1,7 @@
+.idea/*
+db/*
+html/*
+!html/.gitkeep
+mysql/*
+pgdata/*
+.env

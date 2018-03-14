@@ -1,0 +1,19 @@
+FROM php:7-apache
+
+RUN echo "Europe/Berlin" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata
+
+RUN apt-get update -y && apt-get install -y libpng-dev curl libcurl4-openssl-dev libmcrypt-dev libxml2-dev libc-client-dev libpq-dev libkrb5-dev libyaml-dev libcurl3 libuuid1 libevent-dev libgearman-dev libfreetype6-dev libjpeg62-turbo-dev libpcre3-dev vim mailutils mailutils-common
+
+RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ && docker-php-ext-install gd
+RUN docker-php-ext-install pdo pdo_mysql curl iconv soap curl pgsql pdo_pgsql mysqli zip 
+RUN pecl install oauth  && pecl install yaml && pecl install xdebug && docker-php-ext-enable oauth yaml xdebug
+
+COPY config/000-default.conf /etc/apache2/sites-available
+COPY config/composer /usr/local/bin
+RUN /usr/local/bin/composer selfupdate
+
+RUN a2dissite 000-default.conf && a2ensite 000-default.conf
+RUN a2enmod rewrite
+RUN service apache2 restart
+
+RUN rm -f /var/log/apache2/access.log && rm -f /var/log/apache2/error.log && rm -f /var/log/apache2/other_vhosts_access.log

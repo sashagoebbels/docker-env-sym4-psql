@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.php7
+    ports:
+      - "${WEBPORT}:80"
+    volumes:
+      - ./html:/var/www/html
+      - php-logs:/var/log/apache2
+    links:
+      - db
+
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile.mariadb
+    ports:
+      - "${DBPORT}:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpw
+      - MYSQL_DATABASE=lampserver
+      - MYSQL_USER=phpuser
+      - MYSQL_PASSWORD=phppw
+    volumes:
+      - ./mysql:/var/lib/mysql
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - "${PHPMYADMINPORT}:80"
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_ROOT_PASSWORD: rootpw
+      PMA_HOST: db
+      PMA_ARBITRARY: 1
+
+  elk:
+    image: willdurand/elk
+    ports:
+      - "${ELKPORT}:80"
+    volumes:
+      - ./elk/logstash:/etc/logstash
+      - ./elk/logstash/patterns:/opt/logstash/patterns
+      - php-logs:/var/log/apache2
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "${MAILHOGPORT}:8025"
+
+volumes:
+  php-logs:
